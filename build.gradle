@@ -34,6 +34,17 @@ android {
   }
 
   signingConfigs {
+    debug {
+      storeFile file('test-key.jks')
+      keyAlias 'test-alias'
+      storePassword 'testing'
+      keyPassword 'testing'
+    }
+    release {
+    }
+  }
+
+  /*signingConfigs {
     // Debug builds will always be signed. If no environment variables are set, a default
     // keystore will be initialized by the task initDebugKeystore and used. This keystore
     // can be uploaded to GitHub secrets by following instructions in CONTRIBUTING.md
@@ -53,7 +64,7 @@ android {
         keyPassword "$System.env.RELEASE_KEY_PASSWORD"
       }
     }
-  }
+  }*/
 
   buildTypes {
     release {

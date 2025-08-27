@@ -17,6 +17,7 @@ public class Theme
   public final int lockedColor;
   public final int activatedColor;
   public final int labelColor;
+  public final int labelHighlightColor;
   public final int subLabelColor;
   public final int secondaryLabelColor;
   public final int greyedLabelColor;
@@ -43,6 +44,7 @@ public class Theme
     colorNavBar = s.getColor(R.styleable.keyboard_navigationBarColor, 0);
     isLightNavBar = s.getBoolean(R.styleable.keyboard_windowLightNavigationBar, false);
     labelColor = s.getColor(R.styleable.keyboard_colorLabel, 0);
+    labelHighlightColor = s.getColor(R.styleable.keyboard_colorLabelHighlight, 0);
     activatedColor = s.getColor(R.styleable.keyboard_colorLabelActivated, 0);
     lockedColor = s.getColor(R.styleable.keyboard_colorLabelLocked, 0);
     subLabelColor = s.getColor(R.styleable.keyboard_colorSubLabel, 0);

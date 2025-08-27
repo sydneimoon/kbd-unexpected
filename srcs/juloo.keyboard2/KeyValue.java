@@ -527,7 +527,7 @@ public final class KeyValue implements Comparable<KeyValue>
 
       /* Modifiers and dead-keys */
       case "shift": return modifierKey(0xE00A, Modifier.SHIFT, FLAG_DOUBLE_TAP_LOCK);
-      case "ctrl": return modifierKey("Ctrl", Modifier.CTRL, 0);
+      case "ctrl": return modifierKey("CTRL", Modifier.CTRL, 0);
       case "alt": return modifierKey("Alt", Modifier.ALT, 0);
       case "accent_aigu": return diacritic(0xE050, Modifier.AIGU);
       case "accent_caron": return diacritic(0xE051, Modifier.CARON);
@@ -554,7 +554,7 @@ public final class KeyValue implements Comparable<KeyValue>
       case "ordinal": return modifierKey("Ord", Modifier.ORDINAL, 0);
       case "arrows": return modifierKey("Arr", Modifier.ARROWS, 0);
       case "box": return modifierKey("Box", Modifier.BOX, 0);
-      case "fn": return modifierKey("Fn", Modifier.FN, 0);
+      case "fn": return modifierKey("FN", Modifier.FN, 0);
       case "meta": return modifierKey("Meta", Modifier.META, 0);
 
       /* Combining diacritics */

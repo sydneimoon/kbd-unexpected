@@ -18,6 +18,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 import java.util.Arrays;
+import java.util.Set;
 
 public class Keyboard2View extends View
   implements View.OnTouchListener, Pointers.IPointerEventHandler
@@ -405,37 +406,68 @@ public class Keyboard2View extends View
     canvas.restore();
   }
 
-  private int labelColor(KeyValue k, boolean isKeyDown, boolean sublabel)
-  {
-    if (isKeyDown)
-    {
-      int flags = _pointers.getKeyFlags(k);
-      if (flags != -1)
-      {
-        if ((flags & Pointers.FLAG_P_LOCKED) != 0)
-          return _theme.lockedColor;
-        return _theme.activatedColor;
-      }
+    private int getPressedOrLockedColor(KeyValue k) {
+        int flags = _pointers.getKeyFlags(k);
+        if (flags != -1) {
+            if ((flags & Pointers.FLAG_P_LOCKED) != 0)
+                return _theme.lockedColor;
+            return _theme.activatedColor;
+        }
+        return -1;
     }
-    if (k.hasFlagsAny(KeyValue.FLAG_SECONDARY | KeyValue.FLAG_GREYED))
-    {
-      if (k.hasFlagsAny(KeyValue.FLAG_GREYED))
-        return _theme.greyedLabelColor;
-      return _theme.secondaryLabelColor;
-    }
-    return sublabel ? _theme.subLabelColor : _theme.labelColor;
-  }
 
-  private void drawLabel(Canvas canvas, KeyValue kv, float x, float y,
-      float keyH, boolean isKeyDown, Theme.Computed.Key tc)
-  {
-    kv = modifyKey(kv, _mods);
-    if (kv == null)
-      return;
-    float textSize = scaleTextSize(kv, true);
-    Paint p = tc.label_paint(kv.hasFlagsAny(KeyValue.FLAG_KEY_FONT), labelColor(kv, isKeyDown, false), textSize);
-    canvas.drawText(kv.getString(), x, (keyH - p.ascent() - p.descent()) / 2f + y, p);
-  }
+    private int labelColor(KeyValue k, boolean isKeyDown, boolean sublabel, boolean isMainLabel) {
+        String label = k.getString();
+        if (k.hasFlagsAny(KeyValue.FLAG_KEY_FONT) || "CTRL".equals(label) || "FN".equals(label) || k.equals(KeyValue.getKeyByName("nbsp"))) {
+            if (isKeyDown) {
+                int c = getPressedOrLockedColor(k);
+                if (c != -1) return c;
+            }
+            return isMainLabel ? _theme.labelHighlightColor : _theme.subLabelColor;
+        }
+        Set<String> exceptKey = Set.of("Esc", "Ins", "Box", "Alt", "Arr", "Sup", "Sub", "Ord");
+        if (exceptKey.contains(label)) {
+            if (isKeyDown) {
+                int c = getPressedOrLockedColor(k);
+                if (c != -1) return c;
+            }
+            return _theme.subLabelColor;
+        }
+        if (isKeyDown) {
+            int c = getPressedOrLockedColor(k);
+            if (c != -1) return c;
+        }
+        if (k.hasFlagsAny(KeyValue.FLAG_SECONDARY | KeyValue.FLAG_GREYED)) {
+            if (k.hasFlagsAny(KeyValue.FLAG_GREYED))
+                return _theme.greyedLabelColor;
+            return _theme.secondaryLabelColor;
+        }
+        return sublabel ? _theme.subLabelColor : _theme.labelColor;
+    }
+
+    private void drawLabel(Canvas canvas, KeyValue kv, float x, float y,
+                           float keyH, boolean isKeyDown, Theme.Computed.Key tc)
+    {
+        kv = modifyKey(kv, _mods);
+        if (kv == null) return;
+        float textSize = scaleTextSize(kv, true);
+        String label = kv.getString();
+        boolean specialFont = kv.hasFlagsAny(KeyValue.FLAG_KEY_FONT);
+
+        KeyValue shiftKey = KeyValue.getKeyByName("shift");
+        if (kv.equals(shiftKey)) textSize *= 1.2f;
+        KeyValue spaceKey = KeyValue.getKeyByName("space");
+        if (kv.equals(spaceKey)) textSize *= 1.8f;
+        KeyValue nbspKey = KeyValue.getKeyByName("nbsp");
+        if (kv.equals(nbspKey)) textSize *= 1.8f;
+        KeyValue backspaceKey = KeyValue.getKeyByName("backspace");
+        if (kv.equals(backspaceKey)) textSize *= 1.0f;
+
+        int color = labelColor(kv, isKeyDown, false, true);
+        Paint paint = tc.label_paint(specialFont, color, textSize);
+        paint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText(label, x, (keyH - paint.ascent() - paint.descent()) / 2f + y, paint);
+    }
 
   private void drawSubLabel(Canvas canvas, KeyValue kv, float x, float y,
       float keyW, float keyH, int sub_index, boolean isKeyDown,
@@ -447,7 +479,7 @@ public class Keyboard2View extends View
     if (kv == null)
       return;
     float textSize = scaleTextSize(kv, false);
-    Paint p = tc.sublabel_paint(kv.hasFlagsAny(KeyValue.FLAG_KEY_FONT), labelColor(kv, isKeyDown, true), textSize, a);
+    Paint p = tc.sublabel_paint(kv.hasFlagsAny(KeyValue.FLAG_KEY_FONT), labelColor(kv, isKeyDown, true, false), textSize, a);
     float subPadding = _config.keyPadding;
     if (v == Vertical.CENTER)
       y += (keyH - p.ascent() - p.descent()) / 2f;
